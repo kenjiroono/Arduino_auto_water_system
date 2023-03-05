@@ -1,0 +1,306 @@
+<!DOCTYPE html> 
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.jquery.com/jquery-1.6.4.js"></script>
+        <title>Light control - dashboard</title>
+        <style>
+            html, body {
+            margin: 100;
+            padding: 100;
+            font-family: "Roboto", sans-serif;
+            background-color: #ffffff;
+            }
+            
+            h1 {
+                text-align: center;
+                padding: 30px;
+                font-size: 60px;
+                background-color: #127BDE; 
+                color: #ffffff;
+            }
+            
+            .controlContainer {
+                display:inline-flex;
+                justify-content: center;
+                text-align: center;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .btnContainer {
+                display: inline-flex;
+                width: 50%;
+                border: 5px solid #ffffff;
+                font-size: 30px;
+                font-weight: bold;
+                background-color: #127BDE;
+                color: #ffffff;
+                padding: 20px;
+            }
+            
+            .btns {
+                width: 100%;
+            }
+            
+            button {
+                text-align: center;
+                background-color: #ffffff;
+                color: #127BDE;
+                width: 140px;
+                padding: 25px 25px;
+                text-align: center;
+                font-size: 30px;
+                border: 3px outset;
+                opacity: 0.9;
+                font-weight: bold;
+            }
+            
+            button:hover {
+                opacity: 1;
+            }
+            
+            .dot {
+                height: 30px;
+                width: 30px;
+                background-color: #d3d3d3;
+                border-radius: 50%;
+                display:inline-block;
+                
+            }
+     
+            
+            .container {
+                align-items: center;
+                justify-content: center;
+                display:flex;
+                border: 1px  #127BDE;
+                background-color: #ffffff;
+                padding: 30px;
+            }
+            
+            .gauge {
+                text-align: center;
+                min-width: 30%;
+                padding: 5%;
+                font-family: "Roboto", sans-serif;
+                font-size: 30px;
+                font-weight: bold;
+                color: #127BDE;
+            }
+            
+            .gauge__body {
+                width: 100%;
+                height: 0;
+                padding-bottom: 50%;
+                background: #b4c0be;
+                position: relative;
+                border-top-left-radius: 100% 200%;
+                border-top-right-radius: 100% 200%;
+                overflow: hidden;
+            }
+            
+            .gauge__fill {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: inherit;
+                height: 100%;
+                background: #127BDE;
+                transform-origin: center top;
+                transform: rotate(0.25turn);
+                transition: transform 2s ease-out;
+            }
+            
+            .gauge__cover {
+                width: 75%;
+                height: 150%;
+                background: #ffffff;
+                border-radius: 50%;
+                position: absolute;
+                top: 25%;
+                left: 50%;
+                transform: translateX(-50%);
+                /* Text */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding-bottom: 25%;
+                padding-left: 20%;
+                padding-right: 20%;
+                box-sizing: border-box;
+            }
+            
+            .slidecontainer {
+                text-align: center;
+                font-weight: bold;
+                color: #ffffff;
+                width: 50%;
+                border: 5px solid #ffffff;
+                padding: 20px;
+                font-size: 30px;
+                background-color: #127BDE;
+            }
+            
+            .slider {
+                -webkit-appearance: none;
+                width: 80%;
+                height: 10px;
+                background: #d3d3d3;
+                outline: none;
+                opacity: 0.7;
+                -webkit-transition: .2s;
+                transition: opacity .2s;
+            }
+            
+            .slider:hover {
+                opacity: 1;
+            }
+            
+            .slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 15px;
+                height: 30px;
+                border-radius: 20%;
+                background: #ffffff;
+                cursor: pointer;
+            }
+            
+            .slider::-moz-range-thumb {
+                width: 20px;
+                height: 30px;
+                border-radius: 0.1%;
+                background: #ffffff;
+                cursor: pointer;
+            }
+            
+            #thres_container {
+                font-size: 60px;
+            }
+            
+        </style>
+    </head>
+    <body>
+        <h1>Light Source Control Dashboard</h1>
+        <div class="container" >
+            <div id="tempGauge" class="gauge">
+                <p>Temperature</p>
+                <div class="gauge__body">
+                <div class="gauge__fill"></div>
+                <div class="gauge__cover"></div>
+                </div>
+            </div>
+
+            <div id = "humidGauge" class="gauge">
+                <p>Humidity</p>
+                <div class="gauge__body">
+                <div class="gauge__fill"></div>
+                <div class="gauge__cover"></div>
+                </div>
+            </div>
+
+            <div id = "soilGauge" class="gauge">
+                <p>Soil Moisture</p>
+                <div class="gauge__body">
+                <div class="gauge__fill"></div>
+                <div class="gauge__cover"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controlContainer">
+            <div class="slidecontainer">
+                <p>Set irrigation threshold</p>     
+                <p id="thres_container"><span id="thres_val"></span>%</p>                
+                <input type="range" oninput="updateSlider(this)" id="waterSlider" min="0" max="100" value="%SLIDERVALUE%" step="1" class="slider">
+            </div>
+            
+            <div class="btnContainer">
+                <div class="btns">
+                    <p>LED</p>
+                    <button id="pumpBtn" onclick="pumpClick()">LED ON</button>
+                    <br><br>
+                    <div id="pumpDot" class="dot"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+        
+            function updateSlider(element) {
+                var sliderValue = document.getElementById("lightSwaterSliderlider").value;
+                document.getElementById("thres_val").innerHTML = sliderValue;
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/slider?value="+sliderValue, true);
+                xhr.send();
+            }
+
+            const tempGauge = document.getElementById("tempGauge");
+            const humidGauge = document.getElementById("humidGauge");
+            const soilGauge = document.getElementById("soilGauge");
+
+            var getSensorStatus = function () {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var sensStatus = JSON.parse(this.responseText);
+                        console.log(sensStatus);
+                        var pumpON = sensStatus.pumpON;
+                        var temperatureVal = sensStatus.temperatureVal;
+                        var humidityVal = sensStatus.humidityVal;                        
+                        var soilMoistureVal = sensStatus.soilMoistureVal;
+                        changeDotColor('pumpDot', ledON);
+                        
+                        setGaugeValue(tempGauge, tempVal/100, 'C');
+                        setGaugeValue(humidGauge, humidVal/100, '%');
+                        setGaugeValue(soilGauge, moistVal/100, '%');                    
+                    }
+                };
+                xhr.open("GET", "/sensorStatus", true);
+                xhr.send(null);
+            }
+
+            setInterval(getSensorStatus, 5000);
+
+            function setGaugeValue(gauge, value, unit) {
+                let val = value;
+                if (value < 0) { val = 0;};
+                if (value > 1) { val = 1;};
+                gauge.querySelector(".gauge__fill").style.transform = `rotate(${ val / 2 }turn)`;
+                gauge.querySelector(".gauge__cover").textContent = `${Math.round( val * 100 )}${unit}`;
+            }
+
+            function changeDotColor(id, ON) {
+                var dot = document.getElementById(id);
+                if (ON) {
+                    dot.style.backgroundColor = 'salmon';
+                } else {
+                    dot.style.backgroundColor = '#127BDE';
+                }
+            }
+
+
+            const pumpBtn = document.getElementById('pumpBtn');
+
+            pumpBtn.addEventListener('click', function onClick() {
+                pumpBtn.style.backgroundColor = 'salmon';
+                pumpBtn.style.color = 'white';
+                pumpBtn.style.border = '3px inset';
+                setTimeout(function(){ 
+                    pumpBtn.style.backgroundColor = '#ffffff'; 
+                    pumpBtn.style.color = '#127BDE';
+                    pumpBtn.style.border = '3px outset';
+                }, 1000);               
+            });
+
+            function pumpClick(){
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", "/pumpSwitch?value="+"1", true);
+                xhr.send();
+            };
+
+            
+      
+        </script>
+    </body>
+</html>

@@ -1,0 +1,37 @@
+
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"> 
+        <title>Water control - dashboard</title> 
+        <style> html, body { margin: 100; padding: 100; } 
+        canvas { display: block; } 
+        button { background-color: #4bb39a; /* Green */ border: none; color: white; width: 140px; padding: 25px 25px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; }
+         </style> 
+         </head> 
+         <body> 
+            <h1>Water control - dashboard</h1>
+             <br><br><a>Temperature: </a>
+              temperature <p>Humidity: </p> humidity 
+              <br> <br><b><button onclick=\"pumpOn()\">Pump on</button> 
+              <p>Irrigation thres hold (0 ~ 100%):</p> <div class=\"slidecontainer\">
+
+             <input type=\"range\" min=\"1\" max=\"100\" value=\"50\" class=\"slider\" id=\"myRange\"> 
+             <p>Value: <span id=\"demo\"></span></p>
+              </div> 
+              <script> var connection = new WebSocket('ws://'+location.hostname+':81/', ['arduino']); 
+                        connection.onopen = function () { connection.send('Connect ' + new Date()); }; 
+                        connection.onerror = function (error) { console.log('WebSocket Error ', error);}; 
+                        connection.onmessage = function (e) { console.log('Server: ', e.data);}; 
+                        
+                        function pumpOn() { connection.send(\"#\"); }; 
+                        var slider = document.getElementById(\"myRange\"); 
+
+                        var output = document.getElementById(\"demo\"); 
+                        
+                        output.innerHTML = slider.value; 
+                        
+                        slider.oninput = function() { output.innerHTML = this.value;
+                             
+                        console.log(typeof(slider.value)); connection.send(slider.value); }
+                    </script> </body> </html>";
